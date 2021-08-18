@@ -121,7 +121,7 @@ function animate() {
   renderer.render(scene, camera);
 
   controls.update();
-  cameraHelper.update()
+  // cameraHelper.update()
 
   requestAnimationFrame(animate);
 }
