@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 const scene = new THREE.Scene();
 
+// Sizes
 const sizes = {
   width: innerWidth,
   height: innerHeight,
@@ -17,17 +18,13 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(2.5, 5, 3);
+directionalLight.position.set(1.5, 4, 2);
 
 // Lights helper
 const directionalLightHelper = new THREE.DirectionalLightHelper(
   directionalLight,
   1
-);
-
-directionalLight.castShadow = true; // Shadows
-directionalLight.shadow.mapSize.width = 1024; // Shadows
-directionalLight.shadow.mapSize.height = 1024; // Shadows
+)
 scene.add(directionalLight, directionalLightHelper);
 
 /**
@@ -44,15 +41,12 @@ const plane = new THREE.Mesh(
 plane.rotation.x = Math.PI / 2;
 plane.position.y = -0.501;
 plane.material.side = THREE.DoubleSide; // Render both sides
-plane.receiveShadow = true; // Shadows
 scene.add(plane);
 
 const cube = new THREE.Mesh(
   new THREE.BoxBufferGeometry(1, 1, 1),
   new THREE.MeshStandardMaterial({ color: 0xff0000 })
 );
-cube.castShadow = true; // Shadows
-cube.receiveShadow = true; // Shadows
 scene.add(cube);
 
 /**
@@ -67,13 +61,17 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(-3, 2, 4);
 
+
+// Shadows Camera Helper 
+// const cameraHelper  = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(cameraHelper)
+
 /**
  * Renderer
  */
 const renderer = new THREE.WebGL1Renderer();
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.shadowMap.enabled = true; // Shadows
 
 /**
  * Controls
@@ -87,12 +85,32 @@ controls.enableDamping = true; // Smooth camera movement
 addEventListener("resize", () => {
   sizes.height = innerHeight;
   sizes.width = innerWidth;
-
+  
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
-
+  
   renderer.setSize(sizes.width, sizes.height);
 });
+
+/**
+ * Shadows
+ */
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type  = THREE.PCFSoftShadowMap
+
+plane.receiveShadow = true;
+
+cube.castShadow = true;
+cube.receiveShadow = true;
+
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
+
+// Optimizations
+directionalLight.shadow.camera.near = 1
+directionalLight.shadow.camera.far = 9
+
 
 /**
  * rendering frames
@@ -101,7 +119,10 @@ document.body.appendChild(renderer.domElement); // add canvas to scene
 
 function animate() {
   renderer.render(scene, camera);
+
   controls.update();
+  cameraHelper.update()
+
   requestAnimationFrame(animate);
 }
 animate();
