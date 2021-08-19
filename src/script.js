@@ -30,6 +30,8 @@ scene.add(directionalLight, directionalLightHelper);
 /**
  * objects
  */
+
+// Floor
 const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f0f5 });
 planeMaterial.metalness = 0.2;
 planeMaterial.roughness = 0.8;
@@ -43,6 +45,7 @@ plane.position.y = -0.501;
 plane.material.side = THREE.DoubleSide; // Render both sides
 scene.add(plane);
 
+// Cube
 const cube = new THREE.Mesh(
   new THREE.BoxBufferGeometry(1, 1, 1),
   new THREE.MeshStandardMaterial({ color: 0xff0000 })
@@ -50,34 +53,49 @@ const cube = new THREE.Mesh(
 scene.add(cube);
 
 /**
- * Camera
+ * Add your objects here...
  */
 
+
+
+
+
+
+
+
+
+
+
+/**
+ * Camera
+ */
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  500
+  1000
 );
 camera.position.set(-3, 2, 4);
 
 
-// Shadows Camera Helper 
-// const cameraHelper  = new THREE.CameraHelper(directionalLight.shadow.camera)
-// scene.add(cameraHelper)
-
 /**
  * Renderer
  */
-const renderer = new THREE.WebGL1Renderer();
+const canvas = document.querySelector('#webgl')
+
+const renderer = new THREE.WebGL1Renderer({
+  canvas
+});
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
 
 /**
  * Controls
  */
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; // Smooth camera movement
+
 
 /**
  * Update Canvas on Resize
@@ -91,6 +109,7 @@ addEventListener("resize", () => {
   
   renderer.setSize(sizes.width, sizes.height);
 });
+
 
 /**
  * Shadows
@@ -107,7 +126,7 @@ directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 1024;
 directionalLight.shadow.mapSize.height = 1024;
 
-// Optimizations
+// Optimize shadows
 directionalLight.shadow.camera.near = 1
 directionalLight.shadow.camera.far = 9
 
@@ -115,13 +134,14 @@ directionalLight.shadow.camera.far = 9
 /**
  * rendering frames
  */
-document.body.appendChild(renderer.domElement); // add canvas to scene
-
+const clock = new THREE.Clock
 function animate() {
-  renderer.render(scene, camera);
+  const elapsedTime = clock.getElapsedTime()
 
   controls.update();
   // cameraHelper.update()
+  
+  renderer.render(scene, camera);
 
   requestAnimationFrame(animate);
 }
