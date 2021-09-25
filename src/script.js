@@ -4,18 +4,17 @@ import "./CSS/style.scss";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-init()
+init();
 
 function init() {
   const scene = new THREE.Scene();
-
+  scene.background = new THREE.Color("white");
 
   // Sizes
   const sizes = {
     width: innerWidth,
     height: innerHeight,
   };
-
 
   /**
    * lights
@@ -31,19 +30,22 @@ function init() {
     directionalLight,
     1
   );
-  scene.add(directionalLight, directionalLightHelper);
 
+  scene.add(
+    directionalLight
+    //  ,directionalLightHelper
+  );
 
   /**
    * objects
    */
   // Floor
   const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f0f5 });
-  planeMaterial.metalness = 0.2;
-  planeMaterial.roughness = 0.8;
+  planeMaterial.metalness = 0;
+  planeMaterial.roughness = 0.1;
 
   const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(5, 5),
+    new THREE.PlaneBufferGeometry(50, 50),
     planeMaterial
   );
   plane.rotation.x = Math.PI / 2;
@@ -62,15 +64,6 @@ function init() {
    * Add your objects here...
    */
 
-
-
-
-
-
-
-
-
-
   /**
    * Camera
    */
@@ -82,7 +75,6 @@ function init() {
   );
   camera.position.set(-3, 2, 4);
 
-
   /**
    * Renderer
    */
@@ -92,13 +84,11 @@ function init() {
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
-
   /**
    * Controls
    */
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true; // Smooth camera movement
-
 
   /**
    * Update Canvas on Resize
@@ -112,7 +102,6 @@ function init() {
 
     renderer.setSize(sizes.width, sizes.height);
   });
-
 
   /**
    * Shadows
@@ -132,20 +121,19 @@ function init() {
   // Optimize shadows
   directionalLight.shadow.camera.near = 1;
   directionalLight.shadow.camera.far = 9;
-  
-  
+
   /**
    * rendering frames
    */
   const clock = new THREE.Clock();
   function animate() {
     const elapsedTime = clock.getElapsedTime();
-  
+
     controls.update();
     // cameraHelper.update()
-  
+
     renderer.render(scene, camera);
-  
+
     requestAnimationFrame(animate);
   }
   animate();
