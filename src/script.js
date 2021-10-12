@@ -1,6 +1,5 @@
 import "./CSS/normalize.css";
 import "./CSS/style.scss";
-import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -8,7 +7,7 @@ init();
 
 function init() {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("white");
+  scene.background = new THREE.Color("black");
 
   // Sizes
   const sizes = {
@@ -22,61 +21,24 @@ function init() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambientLight);
 
-  const directionalLight = new THREE.PointLight(0xffffff, 10);
-  directionalLight.position.set(1.5, 15, 10);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(10, 15, -9);
 
-  const secondLight = new THREE.DirectionalLight(0xffffff, 4);
-  secondLight.position.set(3, 15, -9);
-
-  // Light helper
-  // const directionalLightHelper = new THREE.DirectionalLightHelper(
-  //   directionalLight,
-  //   1
-  // );
-
-  scene.add(
-    directionalLight
-    //  ,directionalLightHelper
+  // Lighthelper;
+  const directionalLightHelper = new THREE.DirectionalLightHelper(
+    directionalLight,
+    1
   );
 
-  const world = new CANNON.World({
-    gravity: new CANNON.Vec3(0, -9.82, 0),
-  });
-
-  const concreteMat = new CANNON.Material("concrete");
-  const plasticMat = new CANNON.Material("plastic");
-
-  const contactMaterial = new CANNON.ContactMaterial(concreteMat, plasticMat, {
-    friction: 0.2,
-    restitution: 0.7,
-  });
-
-  world.addContactMaterial(contactMaterial);
-  world.defaultContactMaterial = contactMaterial;
-  world.allowSleep = true;
-  world.broadphase = new CANNON.SAPBroadphase(world);
-
-  let cubePhysics = new CANNON.Body({
-    mass: 1,
-    shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
-  });
-  cubePhysics.position.set(0.5, 1, 0);
-  world.addBody(cubePhysics);
-
-  const groundBody = new CANNON.Body({
-    type: CANNON.Body.STATIC,
-    shape: new CANNON.Plane(),
-  });
-  groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-  world.addBody(groundBody);
+  scene.add(directionalLight, directionalLightHelper);
 
   /**
    * objects
    */
   // Floor
-  const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f0f5 });
-  planeMaterial.metalness = 0;
-  planeMaterial.roughness = 0.1;
+  const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+  planeMaterial.metalness = 0.1;
+  planeMaterial.roughness = 0.3;
 
   const plane = new THREE.Mesh(
     new THREE.PlaneBufferGeometry(50, 50),
@@ -89,7 +51,7 @@ function init() {
 
   const boxObject = new THREE.Mesh(
     new THREE.BoxBufferGeometry(2, 2, 2),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
+    new THREE.MeshStandardMaterial({ color: 0xff0000 })
   );
   boxObject.position.y = 1;
   scene.add(boxObject);
@@ -153,49 +115,21 @@ function init() {
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
-
-  // Objects
-
-  function addObject(radius, position) {
-    let sphereBody = new CANNON.Body({
-      mass: 5,
-      shape: new CANNON.Sphere(radius),
-    });
-    sphereBody.position.copy(position);
-
-    world.addBody(sphereBody);
-
-    // Object
-    const object = new THREE.Mesh(
-      new THREE.SphereBufferGeometry(radius, 50, 50),
-      new THREE.MeshStandardMaterial({ color: 0xff0000 })
-    );
-    object.position.copy(position)
-    object.material.metalness = 0.5;
-    object.material.roughness = 0.6;
-    scene.add(object);
-  }
-
-  addObject(2, { x: 0, y: 10, z: 0 });
+  directionalLight.lookAt(new THREE.Vector3());
 
   /**
    * rendering frames
    */
 
   const clock = new THREE.Clock();
-  let lastFrame = 0;
 
   function animate() {
     const elapsedTime = clock.getElapsedTime();
-    lastFrame = elapsedTime - lastFrame;
-
-    world.step(1 / 60, lastFrame);
-    lastFrame = elapsedTime;
 
     controls.update();
 
-    boxObject.position.copy(cubePhysics.position);
-    boxObject.quaternion.copy(cubePhysics.quaternion);
+    directionalLight.position.x = 10 * Math.sin(elapsedTime * 0.5);
+    directionalLight.position.z = 10 * Math.cos(elapsedTime * 0.5);
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
