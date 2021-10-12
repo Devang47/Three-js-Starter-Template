@@ -1,5 +1,6 @@
 import "./CSS/normalize.css";
 import "./CSS/style.scss";
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -7,7 +8,6 @@ init();
 
 function init() {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("black");
 
   // Sizes
   const sizes = {
@@ -22,65 +22,62 @@ function init() {
   scene.add(ambientLight);
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-  directionalLight.position.set(10, 15, -9);
+  directionalLight.position.set(1.5, 4, 2);
 
-  // Lighthelper;
+  // Light helper
   const directionalLightHelper = new THREE.DirectionalLightHelper(
     directionalLight,
     1
   );
-
   scene.add(directionalLight, directionalLightHelper);
 
   /**
    * objects
    */
   // Floor
-  const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-  planeMaterial.metalness = 0.1;
-  planeMaterial.roughness = 0.3;
+  const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f0f5 });
+  planeMaterial.metalness = 0.2;
+  planeMaterial.roughness = 0.8;
 
   const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(50, 50),
+    new THREE.PlaneBufferGeometry(5, 5),
     planeMaterial
   );
   plane.rotation.x = Math.PI / 2;
-  plane.position.y = 0;
+  plane.position.y = -0.501;
   plane.material.side = THREE.DoubleSide; // Render both sides
   scene.add(plane);
 
-  const boxObject = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(2, 2, 2),
+  // Cube
+  const cube = new THREE.Mesh(
+    new THREE.BoxBufferGeometry(1, 1, 1),
     new THREE.MeshStandardMaterial({ color: 0xff0000 })
   );
-  boxObject.position.y = 1;
-  scene.add(boxObject);
+  scene.add(cube);
+
+  /**
+   * Add your objects here...
+   */
 
   /**
    * Camera
    */
   const camera = new THREE.PerspectiveCamera(
-    45,
+    65,
     sizes.width / sizes.height,
     0.1,
     500
   );
-  camera.position.set(-3, 4, 15);
+  camera.position.set(-3, 2, 4);
 
   /**
    * Renderer
    */
   const canvas = document.querySelector("#webgl");
 
-  const renderer = new THREE.WebGL1Renderer({
-    canvas,
-    antialias: true,
-  });
+  const renderer = new THREE.WebGL1Renderer({ canvas });
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.physicallyCorrectLights = true;
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
   /**
    * Controls
@@ -109,29 +106,29 @@ function init() {
 
   plane.receiveShadow = true;
 
-  boxObject.castShadow = true;
-  boxObject.receiveShadow = true;
+  cube.castShadow = true;
+  cube.receiveShadow = true;
 
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
-  directionalLight.lookAt(new THREE.Vector3());
+
+  // Optimize shadows
+  directionalLight.shadow.camera.near = 1;
+  directionalLight.shadow.camera.far = 9;
 
   /**
    * rendering frames
    */
-
   const clock = new THREE.Clock();
-
   function animate() {
     const elapsedTime = clock.getElapsedTime();
 
     controls.update();
-
-    directionalLight.position.x = 10 * Math.sin(elapsedTime * 0.5);
-    directionalLight.position.z = 10 * Math.cos(elapsedTime * 0.5);
+    // cameraHelper.update()
 
     renderer.render(scene, camera);
+
     requestAnimationFrame(animate);
   }
   animate();
